@@ -1,94 +1,64 @@
-queryAction = '';
+// queryAction = '';
 activeTable = '';
 
-//// Change all db's into tables
+//// Might need to change activeTable assignment to a return statement instead
 // Returns a user-specified MySQL database as a string.
 function chooseTable(data) {
   switch(data){
     case 'View all departments':
-      queryAction = 'select';
-      activeTable = 'departments';
+      // queryAction = 'select';
+      activeTable = 'department';
       break;
     case 'View all roles':
-      queryAction = 'select';
-      activeTable = 'roles';
+      // queryAction = 'select';
+      activeTable = 'role';
       break;
     case 'View all employees':
-      queryAction = 'select';
-      activeTable = 'employees';
+      // queryAction = 'select';
+      activeTable = 'employee';
       break;
     case 'Add a department':
-      queryAction = 'add';
-      activeTable = 'departments';
+      // queryAction = 'add';
+      activeTable = 'department';
       break;
     case 'Add a role':
-      queryAction = 'add';
-      activeTable = 'roles';
+      // queryAction = 'add';
+      activeTable = 'role';
       break;
     case 'Add an employee':
-      queryAction = 'add';
-      activeTable = 'employees';
+      // queryAction = 'add';
+      activeTable = 'employee';
       break;
     case 'Update an employee role':
-      queryAction = 'update';
-      activeTable = 'employees';
+      // queryAction = 'update';
+      activeTable = 'employee';
       break;
     default:
       console.log('An error occurred while selecting a database.');
   }
 };
 
-/* //// Might not need this function if I can use a global variable to set the action in chooseDb()
-// Returns an action based on a user-specified option select.
-function setAction(option) {
-  switch(option){
-    case 'View all departments':
-      return 'departments_db';
-      break;
-    case 'View all roles':
-      return 'roles_db';
-      break;
-    case 'View all employees':
-      return 'employees_db';
-      break;
-    case 'Add a department':
-      return 'departments_db';
-      break;
-    case 'Add a role':
-      return 'roles_db';
-      break;
-    case 'Add an employee':
-      return 'employees_db';
-      break;
-    case 'Update an employee role':
-      return 'employees_db';
-      break;
-    default:
-      console.log('An error occurred while selecting a database.');
-  }
-} */
+// Query that selects all results from a user-specified MySQL table.
+function interactDb() {
+  db.query(`SELECT * FROM ${activeTable}`, function (err, results) {
+    err ? console.error(err) : console.log(results);
+  });
+};
 
-// Interacts with a database depending on which action is queried.
-function interactDb(action) {
-  switch(action){
-    case 'view':
-      // Query that selects all from a user-specified MySQL database.
-      db.query(`SELECT * FROM ${activeTable}`, function(err, results) {
-        err ? console.error(err) : console.log(results);
-      });
-      break;
-    case 'add':
-      
-      break;
-    case 'update':
-      
-      break;
-    case '':
-      console.log('Error: No database specified.')
-      break;
-    default:
-      console.log('An error occurred while interacting with the database.');
-  }
+//// Maybe need to make a switch statement that inputs different values for different tables
+//// Update this function with fName, lName, manager_id
+// Query that adds a row to a user-specified MySQL table.
+function interactDb(fName, lName) {
+  db.query(`INSERT INTO ${activeTable} (first_name, last-name) VALUES ('${fName}', '${lName}')`, function (err, results) {
+    err ? console.error(err) : console.log(`Successfully added ${fName} ${lName}.`);
+  });
+};
+
+// Query that updates a row from a user-specified MySQL table.
+function interactDb(employeeId, roleId) {
+  db.query(`UPDATE ${activeTable} SET role_id = ${roleId} WHERE id = ${employeeId}`, function (err, results) {
+    err ? console.error(err) : console.log(`Update successful.\nEmployee ID: ${employeeId}\nRole ID: ${roleId}`);
+  });
 };
 
 module.exports = {
