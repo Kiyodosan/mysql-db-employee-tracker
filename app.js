@@ -52,28 +52,44 @@ function init() {
       {
         name: 'newEmployee',
         type: 'input',
-        message: 'Provide a first name for the new employee.',
+        message: 'Provide a first name.',
         when: (answers) => answers.userOption === 'Add an employee'
       },
       {
         name: 'newEmployeePt2',
         type: 'input',
-        message: 'Provide a last name for the new employee.',
+        message: 'Provide a last name.',
         when: (answers) => answers.userOption === 'Add an employee'
+      },
+      {
+        name: 'newEmployeePt3',
+        type: 'confirm',
+        message: 'Is this employee a manager?',
+        when: (answers) => answers.userOption === 'Add an employee'
+      },
+      {
+        name: 'newEmployeePt4',
+        type: 'input',
+        message: 'Provide a manager ID to assign a manager to the new employee.',
+        when: (answers) => answers.newEmployeePt3 === false
       },
       {
         name: 'changeRole',
         type: 'input',
-        //// Need to find a way to get all employee ids. Change type to list
-        message: 'Select an employee ID:',
+        message: 'Provide an employee ID.',
         when: (answers) => answers.userOption === 'Update an employee role'
       },
       {
         name: 'changeRolePt2',
         type: 'input',
-        //// Need to find a way to get all role titles. Change type to list
-        message: 'Select a role ID:',
+        message: 'Provide a role ID.',
         when: (answers) => answers.userOption === 'Update an employee role'
+      }
+      {
+        name: 'changeRolePt3',
+        type: 'input',
+        message: 'Provide a manager ID to assign a manager to the employee.',
+        when: (answers) => answers.changeRolePt2 === 1
       }
     ])
     .then((response) => {
@@ -84,7 +100,8 @@ function init() {
           user: 'root',
           password: 'password',
           database: 'legitimate_business_db'
-        }
+        },
+        console.log('Connected to legitimate_business_db database.')
       );
 
       // Reads an sql file, splits each query by semi-colon, then runs each query.
@@ -108,8 +125,34 @@ function init() {
 
       dbManipulation.chooseTable(response.userOption);
 
-      //// Need to change this based on select, add, or update
-      dbManipulation.interactDb(dbManipulation.queryAction);
+      // Handles database interaction based on user-specified query type.
+      let managerId;
+      switch (dbManipulation.queryType) {
+        case 'select':
+          dbManipulation.interactDb();
+          break;
+        case 'add':
+          //// New departments and roles functions need to be here as well. Maybe nest another switch statement
+          switch (dbManipulation.activeTable) {
+            case 'department':
+              dbManipulation.interactDb(response.newDepartment);
+              break;
+            case 'role':
+              dbManipulation.interactDb(response.newRole, response.newRolePt2);
+              break;
+            case 'employee':
+              response.newEmployeePt3 ? managerId = null : managerId = response.newEmployeePt4;
+              dbManipulation.interactDb('add', response.newEmployee, response.newEmployeePt2, managerId);
+              break;
+            default:
+              console.log('Error: No table selected.');
+          };
+          break;
+        case 'update':
+          response.changeRolePt2 === 1 ? managerId = null : managerId = response.changeRolePt3;
+          dbManipulation.interactDb('update', response.newEmployee, response.newEmployeePt2, managerId);
+          break;
+      }
     })
     .catch((err) => console.error(err));
 }
@@ -123,6 +166,5 @@ app.listen(PORT, () =>
   console.log(`Listening on ${PORT}`)
 );
 
-//// Might not need this if it runs in localhost. Test first.
 // Initializes the app.
 init();

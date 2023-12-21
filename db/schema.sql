@@ -3,6 +3,7 @@ CREATE DATABASE legitimate_business_db;
 
 USE legitimate_business_db;
 
+---- Auto increment starts from 1
 CREATE TABLE department (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(30) NOT NULL,
